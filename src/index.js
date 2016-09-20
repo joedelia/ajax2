@@ -2,6 +2,19 @@ import $ from 'jquery'
 import _ from 'lodash'
 import {toCamelCase, toSnakeCase} from 'case-converter'
 
+var defaultConvertRequest,
+    defaultConvertResponse;
+
+function configure({convertRequest = 'snakeCase', convertResponse = 'camelCase', headers = {}} = {}) {
+    defaultConvertRequest = convertRequest;
+    defaultConvertResponse = convertResponse;
+    if(!_.isEmpty(headers)) {
+        $.ajaxSetup({
+            headers: headers
+        });
+    }
+}
+
 function request(method, url, data, {convertRequest, convertResponse}) {
     return new Promise((resolve, reject) => {
         if (data) {
@@ -45,5 +58,7 @@ for (let method of ['get', 'post', 'put', 'patch', 'delete']) {
         return request(method, url, data, {convertRequest, convertResponse});
     }
 }
+
+exp['_configure'] = configure;
 
 export default exp;
