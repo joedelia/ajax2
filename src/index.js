@@ -60,5 +60,6 @@ for (let method of ['get', 'post', 'put', 'patch', 'delete']) {
 }
 
 exp['_configure'] = configure;
+exp['_convertCase'] = {toCamelCase, toSnakeCase};
 
 export default exp;
