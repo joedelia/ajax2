@@ -14,21 +14,21 @@ function configure({convertRequest = 'snakeCase', convertResponse = 'camelCase',
     defaultCredentials = credentials;
 }
 
-function parseResponse(body, convertResponse) {
+function parseResponse(response, convertResponse) {
     if (response.headers.get('Content-Type') == 'application/json') {
         switch (convertResponse) {
             case 'snakeCase':
-                return isObject(body.json()) ? toSnakeCase(body.json()) : body.json();
+                return isObject(response.json()) ? toSnakeCase(response.json()) : response.json();
                 break;
             case 'camelCase':
-                return isObject(body.json()) ? toCamelCase(body.json()) : body.json();
+                return isObject(response.json()) ? toCamelCase(response.json()) : response.json();
                 break;
             default:
-                return body.json();
+                return response.json();
                 break;
         }
     } else {
-        return body.text();
+        return response.text();
     }
 }
 
