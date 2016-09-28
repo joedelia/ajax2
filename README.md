@@ -11,9 +11,9 @@ npm i --save ajax2
 To make a request, use the following structure:
 
 ```js
-import ajax from 'ajax2'
+import ajax2 from 'ajax2'
 
-ajax.get('/path/to/resource')
+ajax2.get('/path/to/resource')
     .then(function(response){
         // response will be an object if json was returned or text.
     })
@@ -26,7 +26,7 @@ ajax.get('/path/to/resource')
     });
 
 # Adding data to the request
-ajax.post('/whatever', {hereGoesTheData: ''})
+ajax2.post('/whatever', {hereGoesTheData: ''})
 ```
 
 Supported methods are `get`, `post`, `put`, `patch`, `delete`.
@@ -34,19 +34,21 @@ Supported methods are `get`, `post`, `put`, `patch`, `delete`.
 All calls will return a Promise, which you can use with `await`.
 
 ## Case conversion
-By default, ajax2 will convert request data from `camelCase` to `snake_case`, for usage with Python or Ruby. Conversely
-responses will be converted from `snake_case` to `camelCase`.
+Optionally, ajax2 will convert request data from `camelCase` to `snake_case`, for usage with Python or Ruby. Conversely
+responses can be converted from `snake_case` to `camelCase`.
 
 Note that only the keys will be converted. Example:
 
 ```js
-ajax.post('/whatever', {exampleKey: 'exampleValue'})
+ajax2.post('/whatever', {exampleKey: 'exampleValue'})
 ```
 will create a request with the following json:
 ```js
 {"example_key": "exampleValue"}
 ```
 This is intended to preserve user input.
+
+To enable this, call `ajax2._configure`...
 
 ## Changing configuration
 To change configuration, use `ajax2._configure`.
@@ -62,7 +64,7 @@ ajax2._configure({
 
 You can override configuration for a particular request by passing configuration to the request method.
 ```js
-ajax.post('/whatever', {hereGoesTheData: ''}, {credentials: null})
+ajax2.post('/whatever', {hereGoesTheData: ''}, {credentials: null})
 ```
 
 NB: It is not necessary to specify a `Content-Type` header as this will be set to `application/json` if there is data
