@@ -8,32 +8,40 @@ var defaultConvertRequest = 'snakeCase',
     defaultCredentials = 'same-origin';
 
 function configure({convertRequest, convertResponse, headers, credentials} = {}) {
-    if(typeof convertRequest !== 'undefined') defaultConvertRequest = convertRequest;
-    if(typeof convertResponse !== 'undefined') defaultConvertResponse = convertResponse;
-    if(typeof headers !== 'undefined') defaultHeaders = headers;
-    if(typeof credentials !== 'undefined') defaultCredentials = credentials;
+    if (typeof convertRequest !== 'undefined') defaultConvertRequest = convertRequest;
+    if (typeof convertResponse !== 'undefined') defaultConvertResponse = convertResponse;
+    if (typeof headers !== 'undefined') defaultHeaders = headers;
+    if (typeof credentials !== 'undefined') defaultCredentials = credentials;
 }
 
 function parseResponse(response, convertResponse) {
-    if (response.headers.get('Content-Type') == 'application/json') {
-        switch (convertResponse) {
-            case 'snakeCase':
-                return isObject(response.json()) ? toSnakeCase(response.json()) : response.json();
-                break;
-            case 'camelCase':
-                return isObject(response.json()) ? toCamelCase(response.json()) : response.json();
-                break;
-            default:
-                return response.json();
-                break;
+    return new Promise(resolve => {
+        if (!response) return null;
+        if (response.headers.get('Content-Type') &&
+            response.headers.get('Content-Type').indexOf('application/json') !== -1) {
+            response.json()
+                .then(json => {
+                    switch (convertResponse) {
+                        case 'snakeCase':
+                            resolve(isObject(json) ? toSnakeCase(json) : json);
+                            break;
+                        case 'camelCase':
+                            resolve(isObject(json) ? toCamelCase(json) : json);
+                            break;
+                        default:
+                            resolve(json);
+                            break;
+                    }
+                });
+        } else {
+            response.text()
+                .then(resolve);
         }
-    } else {
-        return response.text();
-    }
+    });
 }
 
 function checkStatus(response) {
-    if (response.status >= 200 && response.status < 300) {
+    if (response.ok) {
         return response;
     } else {
         var error = new Error(response.statusText);
@@ -55,6 +63,7 @@ function request(method, url, data, {convertRequest, convertResponse, headers, c
         if (data) {
             headers['Content-Type'] = 'application/json';
         }
+        headers['X-Requested-With'] = `XMLHttpRequest`;
         fetch(url, {
             method: method,
             url: url,
@@ -64,14 +73,17 @@ function request(method, url, data, {convertRequest, convertResponse, headers, c
         })
             .then(checkStatus)
             .then(function (response) {
-                resolve(parseResponse(response, convertResponse));
+                parseResponse(response, convertResponse).then(resolve);
             })
             .catch(function (error) {
-                reject({
-                    statusCode: error.status,
-                    statusText: error.message,
-                    response: parseResponse(error.response, convertResponse)
-                });
+                parseResponse(error.response, convertResponse)
+                    .then(function (parsedResponse) {
+                        reject({
+                            statusCode: error.status,
+                            statusText: error.message,
+                            response: parsedResponse
+                        });
+                    });
             });
     });
 }
@@ -81,12 +93,12 @@ var exp = {};
 for (let method of ['get', 'post', 'put', 'patch', 'delete']) {
     exp[method] = function (url,
                             data = null,
-                            {
-                                convertRequest = defaultConvertRequest,
-                                convertResponse = defaultConvertResponse,
-                                headers = defaultHeaders,
-                                credentials = defaultCredentials
-                            } = {}) {
+        {
+            convertRequest = defaultConvertRequest,
+            convertResponse = defaultConvertResponse,
+            headers = defaultHeaders,
+            credentials = defaultCredentials
+            } = {}) {
         return request(method.toUpperCase(), url, data, {convertRequest, convertResponse, headers, credentials});
     }
 }
