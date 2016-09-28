@@ -7,11 +7,11 @@ var defaultConvertRequest = 'snakeCase',
     defaultHeaders = {},
     defaultCredentials = 'same-origin';
 
-function configure({convertRequest = 'snakeCase', convertResponse = 'camelCase', headers = {}, credentials = 'same-origin'} = {}) {
-    defaultConvertRequest = convertRequest;
-    defaultConvertResponse = convertResponse;
-    defaultHeaders = headers;
-    defaultCredentials = credentials;
+function configure({convertRequest, convertResponse, headers, credentials} = {}) {
+    if(typeof convertRequest !== 'undefined') defaultConvertRequest = convertRequest;
+    if(typeof convertResponse !== 'undefined') defaultConvertResponse = convertResponse;
+    if(typeof headers !== 'undefined') defaultHeaders = headers;
+    if(typeof credentials !== 'undefined') defaultCredentials = credentials;
 }
 
 function parseResponse(response, convertResponse) {
@@ -38,12 +38,12 @@ function checkStatus(response) {
     } else {
         var error = new Error(response.statusText);
         error.response = response;
-        error.status = status;
+        error.status = response.status;
         throw error;
     }
 }
 
-function request(method, url, data, {convertRequest, convertResponse}) {
+function request(method, url, data, {convertRequest, convertResponse, headers, credentials}) {
     return new Promise((resolve, reject) => {
         if (data) {
             if (convertRequest == 'camelCase') {
@@ -52,7 +52,6 @@ function request(method, url, data, {convertRequest, convertResponse}) {
                 data = toSnakeCase(data);
             }
         }
-        var headers = defaultHeaders;
         if (data) {
             headers['Content-Type'] = 'application/json';
         }
@@ -60,7 +59,7 @@ function request(method, url, data, {convertRequest, convertResponse}) {
             method: method,
             url: url,
             headers: headers,
-            credentials: defaultCredentials,
+            credentials: credentials,
             body: data ? JSON.stringify(data) : null
         })
             .then(checkStatus)
@@ -69,8 +68,8 @@ function request(method, url, data, {convertRequest, convertResponse}) {
             })
             .catch(function (error) {
                 reject({
-                    code: error.status,
-                    error: error.message,
+                    statusCode: error.status,
+                    statusText: error.message,
                     response: parseResponse(error.response, convertResponse)
                 });
             });
@@ -83,10 +82,12 @@ for (let method of ['get', 'post', 'put', 'patch', 'delete']) {
     exp[method] = function (url,
                             data = null,
                             {
-                                convertRequest = defaultConvertRequest || 'snakeCase',
-                                convertResponse = defaultConvertResponse || 'camelCase'
+                                convertRequest = defaultConvertRequest,
+                                convertResponse = defaultConvertResponse,
+                                headers = defaultHeaders,
+                                credentials = defaultCredentials
                             } = {}) {
-        return request(method.toUpperCase(), url, data, {convertRequest, convertResponse});
+        return request(method.toUpperCase(), url, data, {convertRequest, convertResponse, headers, credentials});
     }
 }
 
