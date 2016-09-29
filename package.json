@@ -1,7 +1,7 @@
 {
   "name": "ajax2",
   "version": "0.0.7",
-  "description": "A simple jquery ajax wrapper with case converter",
+  "description": "A simple ajax library with optional case converter",
   "main": "lib/index.js",
   "scripts": {
     "test": "BABEL_ENV=test mocha --compilers js:babel-core/register"
