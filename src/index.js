@@ -4,8 +4,8 @@ import {
 	toSnakeCase
 } from 'case-converter'
 
-var defaultConvertRequest = 'snakeCase',
-	defaultConvertResponse = 'camelCase',
+var defaultConvertRequest = null,
+	defaultConvertResponse = null,
 	defaultHeaders = {},
 	defaultCredentials = 'same-origin',
 	defaultBaseUrl = null;
