@@ -58,7 +58,8 @@ ajax2._configure({
     convertRequest: null, // 'snakeCase', 'camelCase', or null
     convertResponse: null, // 'snakeCase', 'camelCase', or null
     headers: {}, // A dictionary with headers to send with all requests
-    credentials: 'same-origin' // 'same-origin', 'include', or null
+    credentials: 'same-origin', // 'same-origin', 'include', or null
+    baseUrl: null // Whatever url to prepend all requests urls with
 });
 ```
 

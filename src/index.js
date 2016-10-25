@@ -1,5 +1,4 @@
 import 'whatwg-fetch';
-import isObject from 'lodash.isobject'
 import {
 	toCamelCase,
 	toSnakeCase
@@ -8,18 +7,26 @@ import {
 var defaultConvertRequest = 'snakeCase',
 	defaultConvertResponse = 'camelCase',
 	defaultHeaders = {},
-	defaultCredentials = 'same-origin';
+	defaultCredentials = 'same-origin',
+	defaultBaseUrl = null;
+
+function isObject(value) {
+	var type = typeof value;
+	return !!value && (type == 'object' || type == 'function');
+}
 
 function configure({
 	convertRequest,
 	convertResponse,
 	headers,
-	credentials
+	credentials,
+	baseUrl
 } = {}) {
 	if (typeof convertRequest !== 'undefined') defaultConvertRequest = convertRequest;
 	if (typeof convertResponse !== 'undefined') defaultConvertResponse = convertResponse;
 	if (typeof headers !== 'undefined') defaultHeaders = headers;
 	if (typeof credentials !== 'undefined') defaultCredentials = credentials;
+	if (typeof baseUrl !== 'undefined') defaultBaseUrl = baseUrl;
 }
 
 function serializeQuery(obj, prefix) {
@@ -77,7 +84,8 @@ function request(method, url, data, {
 	convertRequest,
 	convertResponse,
 	headers,
-	credentials
+	credentials,
+	baseUrl
 }) {
 	return new Promise((resolve, reject) => {
 		try {
@@ -87,6 +95,15 @@ function request(method, url, data, {
 				} else if (convertRequest == 'snakeCase') {
 					data = toSnakeCase(data);
 				}
+			}
+			if (baseUrl !== null) {
+				var joiner = '';
+				if (baseUrl.substr(-1, 1) !== '/' && url.substr(0, 1) !== '/') {
+					joiner = '/';
+				} else if (baseUrl.substr(-1, 1) === '/' && url.substr(0, 1) === '/') {
+					baseUrl = baseUrl.substr(0, baseUrl.length - 1);
+				}
+				url = baseUrl + joiner + url;
 			}
 			if (data && method === 'GET') {
 				url = url + '?' + serializeQuery(data);
@@ -140,13 +157,15 @@ for (let method of['get', 'post', 'put', 'patch', 'delete']) {
 			convertRequest = defaultConvertRequest,
 			convertResponse = defaultConvertResponse,
 			headers = defaultHeaders,
-			credentials = defaultCredentials
+			credentials = defaultCredentials,
+			baseUrl = defaultBaseUrl
 		} = {}) {
 		return request(method.toUpperCase(), url, data, {
 			convertRequest,
 			convertResponse,
 			headers,
-			credentials
+			credentials,
+			baseUrl
 		});
 	}
 }
@@ -157,4 +176,4 @@ exp['_convertCase'] = {
 	toSnakeCase
 };
 
-export default exp;
+module.exports = exp;
