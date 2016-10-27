@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/joedelia/ajax2#readme",
   "dependencies": {
+    "babel-runtime": "^6.18.0",
     "case-converter": "^1.0.1",
     "whatwg-fetch": "^1.0.0"
   },
