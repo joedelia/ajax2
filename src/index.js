@@ -7,6 +7,7 @@ import {
 var defaultConvertRequest = null,
 	defaultConvertResponse = null,
 	defaultHeaders = {},
+	defaultAddRequestedWith = true,
 	defaultCredentials = 'same-origin',
 	defaultBaseUrl = null;
 
@@ -20,12 +21,14 @@ function configure({
 	convertResponse,
 	headers,
 	credentials,
+	addRequestedWith,
 	baseUrl
 } = {}) {
 	if (typeof convertRequest !== 'undefined') defaultConvertRequest = convertRequest;
 	if (typeof convertResponse !== 'undefined') defaultConvertResponse = convertResponse;
 	if (typeof headers !== 'undefined') defaultHeaders = headers;
 	if (typeof credentials !== 'undefined') defaultCredentials = credentials;
+	if (typeof addRequestedWith !== 'undefined') defaultAddRequestedWith = addRequestedWith;
 	if (typeof baseUrl !== 'undefined') defaultBaseUrl = baseUrl;
 }
 
@@ -85,6 +88,7 @@ function request(method, url, data, {
 	convertResponse,
 	headers,
 	credentials,
+	addRequestedWith,
 	baseUrl
 }) {
 	return new Promise((resolve, reject) => {
@@ -112,7 +116,7 @@ function request(method, url, data, {
 				headers['Content-Type'] = 'application/json';
 			}
 
-			headers['X-Requested-With'] = `XMLHttpRequest`;
+			if(addRequestedWith) headers['X-Requested-With'] = 'XMLHttpRequest';
 
 			var fetchDict = {
 				method: method,
@@ -158,6 +162,7 @@ for (let method of['get', 'post', 'put', 'patch', 'delete']) {
 			convertResponse = defaultConvertResponse,
 			headers = defaultHeaders,
 			credentials = defaultCredentials,
+			addRequestedWith = defaultAddRequestedWith,
 			baseUrl = defaultBaseUrl
 		} = {}) {
 		return request(method.toUpperCase(), url, data, {
@@ -165,6 +170,7 @@ for (let method of['get', 'post', 'put', 'patch', 'delete']) {
 			convertResponse,
 			headers,
 			credentials,
+			addRequestedWith,
 			baseUrl
 		});
 	}

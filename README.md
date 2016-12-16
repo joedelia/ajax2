@@ -58,6 +58,7 @@ ajax2._configure({
     convertRequest: null, // 'snakeCase', 'camelCase', or null
     convertResponse: null, // 'snakeCase', 'camelCase', or null
     headers: {}, // A dictionary with headers to send with all requests
+    addRequestedWith: true, // Adds 'X-Requested-With' to headers
     credentials: 'same-origin', // 'same-origin', 'include', or null
     baseUrl: null // Whatever url to prepend all requests urls with
 });
@@ -70,4 +71,3 @@ ajax2.post('/whatever', {hereGoesTheData: ''}, {credentials: null})
 
 NB: It is not necessary to specify a `Content-Type` header as this will be set to `application/json` if there is data
 (and it is not a `GET` request).
-NB2: A `X-Requested-With` header is automatically set to `XMLHttpRequest`.
