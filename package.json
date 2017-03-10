@@ -29,6 +29,44 @@
     "grunt-babel": "^6.0.0",
     "grunt-bump": "^0.8.0",
     "grunt-notify": "^0.4.5",
-    "load-grunt-tasks": "^3.5.2"
+    "load-grunt-tasks": "^3.5.2",
+    "xo": "^0.17.1"
+  },
+  "xo": {
+    "envs": [
+      "browser"
+    ],
+    "rules": {
+      "no-unused-vars": [
+        "warn",
+        {
+          "vars": "all",
+          "args": "none",
+          "varsIgnorePattern": "^_"
+        }
+      ],
+      "one-var": [
+        "warn",
+        {
+          "uninitialized": "always"
+        }
+      ],
+      "curly": [
+        "error",
+        "multi-or-nest",
+        "consistent"
+      ],
+      "no-new": 0,
+      "no-prototype-builtins": 0,
+      "no-loop-func": 0,
+      "no-alert": 0,
+      "indent": [
+        "error",
+        2
+      ]
+    },
+    "ignores": [
+      "Gruntfile.js"
+    ]
   }
 }
