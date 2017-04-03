@@ -1,15 +1,18 @@
 import 'whatwg-fetch'; // eslint-disable-line import/no-unassigned-import
 import {toCamelCase, toSnakeCase} from 'case-converter';
+import EventDispatcher from './events';
 
-var defaultConvertRequest = null,
+let defaultConvertRequest = null,
   defaultConvertResponse = null,
   defaultHeaders = {},
   defaultAddRequestedWith = true,
   defaultCredentials = 'same-origin',
   defaultBaseUrl = null;
 
+const events = new EventDispatcher();
+
 function isObject(value) {
-  var type = typeof value;
+  const type = typeof value;
   return Boolean(value) && (type === 'object' || type === 'function');
 }
 
@@ -30,10 +33,10 @@ function configure({
 }
 
 function serializeQuery(obj, prefix) {
-  var str = [];
-  for (var p in obj) {
+  const str = [];
+  for (const p in obj) {
     if (obj.hasOwnProperty(p)) {
-      var k = prefix ? prefix + '[' + p + ']' : p,
+      const k = prefix ? prefix + '[' + p + ']' : p,
         v = obj[p];
       str.push(typeof v === 'object' ?
       serializeQuery(v, k) :
@@ -73,7 +76,7 @@ function checkStatus(response) {
   if (response.ok)
     return response;
 
-  var error = new Error(response.statusText);
+  const error = new Error(response.statusText);
   error.response = response;
   error.status = response.status;
   throw error;
@@ -87,6 +90,10 @@ function request(method, url, data, {
   addRequestedWith,
   baseUrl
 }) {
+  events._fire('request', {
+    method, url, data, convertRequest, convertResponse, headers,
+    credentials, addRequestedWith, baseUrl
+  });
   return new Promise((resolve, reject) => {
     try {
       if (data) {
@@ -96,7 +103,7 @@ function request(method, url, data, {
           data = toSnakeCase(data);
       }
       if (baseUrl !== null) {
-        var joiner = '';
+        let joiner = '';
         if (baseUrl.substr(-1, 1) !== '/' && url.substr(0, 1) !== '/')
           joiner = '/';
         else if (baseUrl.substr(-1, 1) === '/' && url.substr(0, 1) === '/')
@@ -112,28 +119,35 @@ function request(method, url, data, {
 
       if (addRequestedWith) headers['X-Requested-With'] = 'XMLHttpRequest';
 
-      var fetchDict = {
-        method: method,
-        headers: headers,
-        credentials: credentials
+      const fetchDict = {
+        method,
+        headers,
+        credentials
       };
       if (data)
         fetchDict.body = JSON.stringify(data);
 
       fetch(url, fetchDict)
         .then(checkStatus)
-        .then(function (response) {
-          parseResponse(response, convertResponse).then(resolve);
+        .then(response => {
+          events._fire('responseRaw', response);
+          parseResponse(response, convertResponse).then(parsedResponse => {
+            events._fire('success', parsedResponse);
+            resolve(parsedResponse);
+          });
         })
-        .catch(function (err) {
+        .catch(err => {
           if (err.response) {
+            events._fire('responseRaw', err.response);
             parseResponse(err.response, convertResponse)
-              .then(function (parsedResponse) {
-                reject({
+              .then(parsedResponse => {
+                const errorResponse = {
                   statusCode: err.status,
                   statusText: err.message,
                   response: parsedResponse
-                });
+                };
+                events._fire('error', errorResponse);
+                reject(errorResponse);
               })
               .catch(reject);
           } else {
@@ -146,9 +160,9 @@ function request(method, url, data, {
   });
 }
 
-var exp = {};
+const exp = {};
 
-for (let method of ['get', 'post', 'put', 'patch', 'delete']) {
+for (const method of ['get', 'post', 'put', 'patch', 'delete']) {
   exp[method] = function (url,
     data = null, {
       convertRequest = defaultConvertRequest,
@@ -174,5 +188,9 @@ exp._convertCase = {
   toCamelCase,
   toSnakeCase
 };
+
+exp.on = (...args) => events.on(...args);
+exp.off = (...args) => events.off(...args);
+exp.once = (...args) => events.once(...args);
 
 module.exports = exp;
