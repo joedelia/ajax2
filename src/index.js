@@ -121,11 +121,13 @@ function request(method, url, data, {
 
       const fetchDict = {
         method,
-        headers,
-        credentials
+        headers
       };
       if (data)
         fetchDict.body = JSON.stringify(data);
+
+      if (credentials)
+        fetchDict.credentials = credentials;
 
       fetch(url, fetchDict)
         .then(checkStatus)
