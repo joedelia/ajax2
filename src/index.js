@@ -84,11 +84,12 @@ function checkStatus(response) {
   if (response.ok)
     return response;
 
-  const error = new HttpError(response.statusText);
+  const error = new HttpError(response.status + ' - ' + response.statusText);
   error.response = response;
   error.status = response.status;
   error.statusCode = response.status;
   error.statusText = response.statusText;
+  error.ok = false;
   throw error;
 }
 
@@ -153,6 +154,8 @@ function request(method, url, data, {
             events._fire('responseRaw', err.response);
             parseResponse(err.response, convertResponse)
               .then(parsedResponse => {
+                if (typeof parsedResponse.error === 'string')
+                  err.message += ': ' + parsedResponse.error;
                 err.response = parsedResponse;
                 events._fire('error', err);
                 reject(err);
