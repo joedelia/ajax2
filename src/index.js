@@ -47,8 +47,8 @@ function serializeQuery(obj, prefix) {
       const k = prefix ? prefix + '[' + p + ']' : p,
         v = obj[p];
       str.push(typeof v === 'object' ?
-      serializeQuery(v, k) :
-      encodeURIComponent(k) + '=' + encodeURIComponent(v));
+        serializeQuery(v, k) :
+        encodeURIComponent(k) + '=' + encodeURIComponent(v));
     }
   }
   return str.join('&');
@@ -122,7 +122,7 @@ function request(method, url, data, {
         url = baseUrl + joiner + url;
       }
       if (data && method === 'GET') {
-        url = url + '?' + serializeQuery(data);
+        url = url + (url.indexOf('?') === -1 ? '?' : '&') + serializeQuery(data);
         data = null;
       } else if (data) {
         headers['Content-Type'] = 'application/json';
@@ -149,24 +149,24 @@ function request(method, url, data, {
             resolve(parsedResponse);
           });
         })
-        .catch(err => {
-          if (err.response) {
-            events._fire('responseRaw', err.response);
-            parseResponse(err.response, convertResponse)
+        .catch(error => {
+          if (error.response) {
+            events._fire('responseRaw', error.response);
+            parseResponse(error.response, convertResponse)
               .then(parsedResponse => {
                 if (typeof parsedResponse.error === 'string')
-                  err.message += ': ' + parsedResponse.error;
-                err.response = parsedResponse;
-                events._fire('error', err);
-                reject(err);
+                  error.message += ': ' + parsedResponse.error;
+                error.response = parsedResponse;
+                events._fire('error', error);
+                reject(error);
               })
               .catch(reject);
           } else {
-            reject(err);
+            reject(error);
           }
         });
-    } catch (err) {
-      reject(err);
+    } catch (error) {
+      reject(error);
     }
   });
 }
