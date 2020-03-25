@@ -2,14 +2,6 @@ import 'whatwg-fetch'; // eslint-disable-line import/no-unassigned-import
 import {toCamelCase, toSnakeCase} from 'case-converter';
 import EventDispatcher from './events';
 
-class HttpError extends Error {
-  constructor(...args) {
-    super(...args);
-    this.name = 'HttpError';
-    Error.captureStackTrace(this, HttpError);
-  }
-}
-
 let defaultConvertRequest = null,
   defaultConvertResponse = null,
   defaultHeaders = {},
@@ -84,7 +76,7 @@ function checkStatus(response) {
   if (response.ok)
     return response;
 
-  const error = new HttpError(response.status + ' - ' + response.statusText);
+  const error = new Error('HTTP Error ' + response.status + ' - ' + response.statusText);
   error.response = response;
   error.status = response.status;
   error.statusCode = response.status;
