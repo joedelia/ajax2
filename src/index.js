@@ -43,6 +43,7 @@ function serializeQuery(obj, prefix) {
         encodeURIComponent(k) + '=' + encodeURIComponent(v));
     }
   }
+
   return str.join('&');
 }
 
@@ -93,6 +94,9 @@ function request(method, url, data, {
   addRequestedWith,
   baseUrl
 }) {
+  // Does not rewrite headers every time
+  headers = Object.assign({}, defaultHeaders, headers);
+
   events._fire('request', {
     method, url, data, convertRequest, convertResponse, headers,
     credentials, addRequestedWith, baseUrl
@@ -105,6 +109,7 @@ function request(method, url, data, {
         else if (convertRequest === 'snakeCase')
           data = toSnakeCase(data);
       }
+
       if (baseUrl !== null) {
         let joiner = '';
         if (baseUrl.substr(-1, 1) !== '/' && url.substr(0, 1) !== '/')
@@ -113,6 +118,7 @@ function request(method, url, data, {
           baseUrl = baseUrl.substr(0, baseUrl.length - 1);
         url = baseUrl + joiner + url;
       }
+
       if (data && method === 'GET') {
         url = url + (url.indexOf('?') === -1 ? '?' : '&') + serializeQuery(data);
         data = null;
@@ -170,7 +176,7 @@ for (const method of ['get', 'post', 'put', 'patch', 'delete']) {
     data = null, {
       convertRequest = defaultConvertRequest,
       convertResponse = defaultConvertResponse,
-      headers = defaultHeaders,
+      headers = {},
       credentials = defaultCredentials,
       addRequestedWith = defaultAddRequestedWith,
       baseUrl = defaultBaseUrl
