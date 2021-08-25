@@ -1,5 +1,6 @@
 import 'whatwg-fetch'; // eslint-disable-line import/no-unassigned-import
-import {toCamelCase, toSnakeCase} from 'case-converter';
+import toCamelCase from 'camelcase-keys';
+import toSnakeCase from 'snakecase-keys';
 import EventDispatcher from './events';
 
 let defaultConvertRequest = null,
