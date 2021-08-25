@@ -1,6 +1,6 @@
 {
   "name": "ajax2",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "A simple ajax library with optional case converter",
   "main": "lib/index.js",
   "scripts": {
