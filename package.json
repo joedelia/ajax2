@@ -30,7 +30,7 @@
     "grunt-babel": "^7.0.0",
     "grunt-bump": "^0.8.0",
     "grunt-notify": "^0.4.5",
-    "load-grunt-tasks": "^3.5.2",
+    "load-grunt-tasks": "^5.1.0",
     "xo": "^0.44.0"
   },
   "xo": {
